@@ -51,7 +51,7 @@ function makeDir() {
 }
 
 err_report() {
-  FAILED_COMMAND=$(wget -q -O - https://raw.githubusercontent.com/Sinusbot/installer-linux/master/sinusbot_installer.sh | sed -e "$1q;d")
+  FAILED_COMMAND=$(wget -q -O - https://raw.githubusercontent.com/MaanKoloo/test/master/sinusbot2_installer.sh | sed -e "$1q;d")
   FAILED_COMMAND=${FAILED_COMMAND/ -qq}
   FAILED_COMMAND=${FAILED_COMMAND/ -q}
   FAILED_COMMAND=${FAILED_COMMAND/ -s}
@@ -59,7 +59,7 @@ err_report() {
   FAILED_COMMAND=${FAILED_COMMAND/ 2\>&1}
   FAILED_COMMAND=${FAILED_COMMAND/ \>\/dev\/null}
   if [[ "$FAILED_COMMAND" == "" ]]; then
-    redMessage "Failed command: https://github.com/Sinusbot/installer-linux/blob/master/sinusbot_installer.sh#L""$1"
+    redMessage "Failed command: https://raw.githubusercontent.com/MaanKoloo/test/master/sinusbot2_installer.sh#L""$1"
   else
     redMessage "Command which failed was: \"${FAILED_COMMAND}\". Please try to execute it manually and attach the output to the bug report in the forum thread."
     redMessage "If it still doesn't work report this to the author at https://forum.sinusbot.com/threads/sinusbot-installer-script.1200/ only. Not a PN or a bad review, cause this is an error of your system not of the installer script. Line $1."
@@ -146,7 +146,7 @@ if [[ $INSTALL == "Res" ]]; then
   if [ "$OPTION" == "Automatic" ]; then
     LOCATION=/opt/sinusbot2
   elif [ "$OPTION" == "Own path" ]; then
-    yellowMessage "Enter location where the bot should be installed/updated/removed. Like /opt/sinusbot. Include the / at first position and none at the end"!
+    yellowMessage "Enter location where the bot should be installed/updated/removed. Like /opt/sinusbot2. Include the / at first position and none at the end"!
 
     LOCATION=""
     while [[ ! -d $LOCATION ]]; do
@@ -192,13 +192,13 @@ if [[ $INSTALL == "Res" ]]; then
   greenMessage "Please login to your SinusBot webinterface as admin and '$PW'"
   yellowMessage "After that change your password under Settings->User Accounts->admin->Edit. The script restart the bot with init.d or systemd."
 
-  if [[ -f /lib/systemd/system/sinusbot.service ]]; then
+  if [[ -f /lib/systemd/system/sinusbot2.service ]]; then
     if [[ $(systemctl is-active sinusbot >/dev/null && echo UP || echo DOWN) == "UP" ]]; then
       service sinusbot stop
     fi
-  elif [[ -f /etc/init.d/sinusbot2 ]]; then
-    if [ "$(/etc/init.d/sinusbot2 status | awk '{print $NF; exit}')" == "UP" ]; then
-      /etc/init.d/sinusbot2 stop
+  elif [[ -f /etc/init.d/sinusbot ]]; then
+    if [ "$(/etc/init.d/sinusbot status | awk '{print $NF; exit}')" == "UP" ]; then
+      /etc/init.d/sinusbot stop
     fi
   fi
 
@@ -217,10 +217,10 @@ if [[ $INSTALL == "Res" ]]; then
 
       greenMessage "Successfully changed your admin password."
 
-      if [[ -f /lib/systemd/system/sinusbot.service ]]; then
+      if [[ -f /lib/systemd/system/sinusbot2.service ]]; then
         service sinusbot2 start
         greenMessage "Started your bot with systemd."
-      elif [[ -f /etc/init.d/sinusbot2 ]]; then
+      elif [[ -f /etc/init.d/sinusbot ]]; then
         /etc/init.d/sinusbot2 start
         greenMessage "Started your bot with initd."
       else
@@ -336,13 +336,13 @@ elif [ "$OPTION" == "Own path" ]; then
   yellowMessage "Enter location where the bot should be installed/updated/removed, e.g. /opt/sinusbot. Include the / at first position and none at the end"!
   LOCATION=""
   while [[ ! -d $LOCATION ]]; do
-    read -rp "Location [/opt/sinusbot2]: " LOCATION
+    read -rp "Location [/opt/sinusbot]: " LOCATION
     if [[ $INSTALL != "Inst" && ! -d $LOCATION ]]; then
       redMessage "Directory not found, try again"!
     fi
     if [ "$INSTALL" == "Inst" ]; then
       if [ "$LOCATION" == "" ]; then
-        LOCATION=/opt/sinusbot2
+        LOCATION=/opt/sinusbot
       fi
       makeDir $LOCATION
     fi
@@ -377,7 +377,7 @@ fi
 
 makeDir $LOCATION
 
-LOCATIONex=$LOCATION/sinusbot2
+LOCATIONex=$LOCATION/sinusbot
 
 # Check if SinusBot already installed and if update is possible
 
@@ -403,7 +403,7 @@ fi
 
 if [[ $INSTALL == "Inst" ]]; then
 
-  if [[ -f $LOCATION/sinusbot2 ]]; then
+  if [[ -f $LOCATION/sinusbot ]]; then
     redMessage "SinusBot already installed with automatic install option"!
     read -rp "Would you like to update the bot instead? [Y / N]: " OPTION
 
@@ -483,23 +483,23 @@ if [ "$INSTALL" == "Rem" ]; then
     done
   fi
 
-  if [[ -f /lib/systemd/system/sinusbot.service ]]; then
+  if [[ -f /lib/systemd/system/sinusbot2.service ]]; then
     if [[ $(systemctl is-active sinusbot >/dev/null && echo UP || echo DOWN) == "UP" ]]; then
-      service sinusbot2 stop
-      systemctl disable sinusbot2
+      service sinusbot stop
+      systemctl disable sinusbot
     fi
-    rm /lib/systemd/system/sinusbot.service
-  elif [[ -f /etc/init.d/sinusbot2 ]]; then
-    if [ "$(/etc/init.d/sinusbot2 status | awk '{print $NF; exit}')" == "UP" ]; then
-      su -c "/etc/init.d/sinusbot2 stop" $SINUSBOTUSER
+    rm /lib/systemd/system/sinusbot2.service
+  elif [[ -f /etc/init.d/sinusbot ]]; then
+    if [ "$(/etc/init.d/sinusbot status | awk '{print $NF; exit}')" == "UP" ]; then
+      su -c "/etc/init.d/sinusbot stop" $SINUSBOTUSER
       su -c "screen -wipe" $SINUSBOTUSER
-      update-rc.d -f sinusbot2 remove >/dev/null
+      update-rc.d -f sinusbot remove >/dev/null
     fi
-    rm /etc/init.d/sinusbot2
+    rm /etc/init.d/sinusbot
   fi
 
   if [[ -f /etc/cron.d/sinusbot ]]; then
-    rm /etc/cron.d/sinusbot2
+    rm /etc/cron.d/sinusbot
   fi
 
   if [ "$LOCATION" ]; then
@@ -821,7 +821,7 @@ if [[ -f teamspeak3-client/xcbglintegrations/libqxcb-glx-integration.so ]]; then
 fi
 fi
 
-chmod 755 sinusbot2
+chmod 755 sinusbot
 
 if [ "$INSTALL" == "Inst" ]; then
   greenMessage "SinusBot installation done."
@@ -833,28 +833,28 @@ if [[ "$USE_SYSTEMD" == true ]]; then
 
   greenMessage "Starting systemd installation"
 
-  if [[ -f /etc/systemd/system/sinusbot.service ]]; then
-    service sinusbot2 stop
-    systemctl disable sinusbot2
-    rm /etc/systemd/system/sinusbot.service
+  if [[ -f /etc/systemd/system/sinusbot2.service ]]; then
+    service sinusbot stop
+    systemctl disable sinusbot
+    rm /etc/systemd/system/sinusbot2.service
   fi
 
   cd /lib/systemd/system/
 
-  wget -q https://raw.githubusercontent.com/Sinusbot/linux-startscript/master/sinusbot.service
+  wget -q https://raw.githubusercontent.com/MaanKoloo/test/master/sinusbot2_installer.sh
 
-  if [ ! -f sinusbot.service ]; then
+  if [ ! -f sinusbot2.service ]; then
     errorExit "Download failed! Exiting now"!
   fi
 
-  sed -i 's/User=YOUR_USER/User='$SINUSBOTUSER'/g' /lib/systemd/system/sinusbot.service
-  sed -i 's!ExecStart=YOURPATH_TO_THE_BOT_BINARY!ExecStart='$LOCATIONex'!g' /lib/systemd/system/sinusbot.service
-  sed -i 's!WorkingDirectory=YOURPATH_TO_THE_BOT_DIRECTORY!WorkingDirectory='$LOCATION'!g' /lib/systemd/system/sinusbot.service
+  sed -i 's/User=YOUR_USER/User='$SINUSBOTUSER'/g' /lib/systemd/system/sinusbot2.service
+  sed -i 's!ExecStart=YOURPATH_TO_THE_BOT_BINARY!ExecStart='$LOCATIONex'!g' /lib/systemd/system/sinusbot2.service
+  sed -i 's!WorkingDirectory=YOURPATH_TO_THE_BOT_DIRECTORY!WorkingDirectory='$LOCATION'!g' /lib/systemd/system/sinusbot2.service
 
   systemctl daemon-reload
-  systemctl enable sinusbot.service
+  systemctl enable sinusbot2.service
 
-  greenMessage 'Installed systemd file to start the SinusBot with "service sinusbot2 {start|stop|status|restart}"'
+  greenMessage 'Installed systemd file to start the SinusBot with "service sinusbot {start|stop|status|restart}"'
 
 elif [[ "$USE_SYSTEMD" == false ]]; then
 
@@ -862,24 +862,24 @@ elif [[ "$USE_SYSTEMD" == false ]]; then
 
   cd /etc/init.d/
 
-  wget -q https://raw.githubusercontent.com/Sinusbot/linux-startscript/obsolete-init.d/sinusbot
+  wget -q https://raw.githubusercontent.com/MaanKoloo/test/master/sinusbot
 
   if [ ! -f sinusbot ]; then
     errorExit "Download failed! Exiting now"!
   fi
 
-  sed -i 's/USER="mybotuser"/USER="'$SINUSBOTUSER'"/g' /etc/init.d/sinusbot2
-  sed -i 's!DIR_ROOT="/opt/ts3soundboard/"!DIR_ROOT="'$LOCATION'/"!g' /etc/init.d/sinusbot2
+  sed -i 's/USER="mybotuser"/USER="'$SINUSBOTUSER'"/g' /etc/init.d/sinusbot
+  sed -i 's!DIR_ROOT="/opt/ts3soundboard/"!DIR_ROOT="'$LOCATION'/"!g' /etc/init.d/sinusbot
 
-  chmod +x /etc/init.d/sinusbot2
+  chmod +x /etc/init.d/sinusbot
 
   if [[ -f /etc/centos-release ]]; then
-    chkconfig sinusbot2 on >/dev/null
+    chkconfig sinusbot on >/dev/null
   else
-    update-rc.d sinusbot2 defaults >/dev/null
+    update-rc.d sinusbot defaults >/dev/null
   fi
 
-  greenMessage 'Installed init.d file to start the SinusBot with "/etc/init.d/sinusbot2 {start|stop|status|restart|console|update|backup}"'
+  greenMessage 'Installed init.d file to start the SinusBot with "/etc/init.d/sinusbot {start|stop|status|restart|console|update|backup}"'
 fi
 
 cd $LOCATION
@@ -908,11 +908,11 @@ if [ "$INSTALL" == "Inst" ]; then
   fi
 fi
 
-#if [[ -f /etc/cron.d/sinusbot2 ]]; then
+#if [[ -f /etc/cron.d/sinusbot ]]; then
 #  redMessage "Cronjob already set for SinusBot updater"!
 #else
 #  greenMessage "Installing Cronjob for automatic SinusBot update..."
-#  echo "0 0 * * * $SINUSBOTUSER $LOCATION/sinusbot -update >/dev/null" >>/etc/cron.d/sinusbot2
+#  echo "0 0 * * * $SINUSBOTUSER $LOCATION/sinusbot -update >/dev/null" >>/etc/cron.d/sinusbot
 #  greenMessage "Installing SinusBot update cronjob successful."
 #fi
 
@@ -958,7 +958,7 @@ fi
 if [ ! -a "$LOCATION/README_installer.txt" ] && [ "$USE_SYSTEMD" == true ]; then
   echo '##################################################################################
 # #
-# Usage: service sinusbot2 {start|stop|status|restart} #
+# Usage: service sinusbot {start|stop|status|restart} #
 # - start: start the bot #
 # - stop: stop the bot #
 # - status: display the status of the bot (down or up) #
@@ -968,7 +968,7 @@ if [ ! -a "$LOCATION/README_installer.txt" ] && [ "$USE_SYSTEMD" == true ]; then
 elif [ ! -a "$LOCATION/README_installer.txt" ] && [ "$USE_SYSTEMD" == false ]; then
   echo '##################################################################################
   # #
-  # Usage: /etc/init.d/sinusbot2 {start|stop|status|restart|console|update|backup} #
+  # Usage: /etc/init.d/sinusbot {start|stop|status|restart|console|update|backup} #
   # - start: start the bot #
   # - stop: stop the bot #
   # - status: display the status of the bot (down or up) #
@@ -1004,7 +1004,7 @@ if [ "$INSTALL" != "Updt" ]; then
 
   # Password variable
 
-  export Q=$(su $SINUSBOTUSER -c './sinusbot2 --initonly')
+  export Q=$(su $SINUSBOTUSER -c './sinusbot --initonly')
   password=$(export | awk '/password/{ print $10 }' | tr -d "'")
   if [ -z "$password" ]; then
     errorExit "Failed to read password, try a reinstall again."
@@ -1045,11 +1045,11 @@ fi
 # If startup failed, the script will start normal sinusbot without screen for looking about errors. If startup successed => installation done.
 IS_RUNNING=false
 if [[ "$USE_SYSTEMD" == true ]]; then
-  if [[ $(systemctl is-active sinusbot2 >/dev/null && echo UP || echo DOWN) == "UP" ]]; then
+  if [[ $(systemctl is-active sinusbot >/dev/null && echo UP || echo DOWN) == "UP" ]]; then
     IS_RUNNING=true
   fi
 elif [[ "$USE_SYSTEMD" == false ]]; then
-  if [[ $(/etc/init.d/sinusbot2 status | awk '{print $NF; exit}') == "UP" ]]; then
+  if [[ $(/etc/init.d/sinusbot status | awk '{print $NF; exit}') == "UP" ]]; then
      IS_RUNNING=true
   fi
 fi
@@ -1066,12 +1066,12 @@ if [[ "$IS_RUNNING" == true ]]; then
   fi
 
   if [[ $INSTALL == "Updt" ]]; then
-    if [[ -f /lib/systemd/system/sinusbot.service ]]; then
-      service sinusbot2 restart
+    if [[ -f /lib/systemd/system/sinusbot2.service ]]; then
+      service sinusbot restart
       greenMessage "Restarted your bot with systemd."
     fi
-    if [[ -f /etc/init.d/sinusbot2 ]]; then
-      /etc/init.d/sinusbot2 restart
+    if [[ -f /etc/init.d/sinusbot ]]; then
+      /etc/init.d/sinusbot restart
       greenMessage "Restarted your bot with initd."
     fi
     greenMessage "All right. Everything is updated successfully. SinusBot is UP on '$ipaddress:8088' :)"
@@ -1079,9 +1079,9 @@ if [[ "$IS_RUNNING" == true ]]; then
     greenMessage "All right. Everything is installed successfully. SinusBot is UP on '$ipaddress:8088' :) Your user = 'admin' and password = '$password'"
   fi
   if [[ "$USE_SYSTEMD" == true ]]; then
-    redMessage 'Stop it with "service sinusbot2 stop".'
+    redMessage 'Stop it with "service sinusbot stop".'
   elif [[ "$USE_SYSTEMD" == false ]]; then
-    redMessage 'Stop it with "/etc/init.d/sinusbot2 stop".'
+    redMessage 'Stop it with "/etc/init.d/sinusbot stop".'
   fi
   magentaMessage "Don't forget to rate this script on: https://forum.sinusbot.com/resources/sinusbot-installer-script.58/"
   greenMessage "Thank you for using this script! :)"
