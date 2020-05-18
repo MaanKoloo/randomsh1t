@@ -51,7 +51,7 @@ function makeDir() {
 }
 
 err_report() {
-  FAILED_COMMAND=$(wget -q -O - https://raw.githubusercontent.com/MaanKoloo/test/master/sinusbot2_installer.sh | sed -e "$1q;d")
+  FAILED_COMMAND=$(wget -q -O - https://raw.githubusercontent.com/Sinusbot/installer-linux/master/sinusbot_installer.sh | sed -e "$1q;d")
   FAILED_COMMAND=${FAILED_COMMAND/ -qq}
   FAILED_COMMAND=${FAILED_COMMAND/ -q}
   FAILED_COMMAND=${FAILED_COMMAND/ -s}
@@ -59,7 +59,7 @@ err_report() {
   FAILED_COMMAND=${FAILED_COMMAND/ 2\>&1}
   FAILED_COMMAND=${FAILED_COMMAND/ \>\/dev\/null}
   if [[ "$FAILED_COMMAND" == "" ]]; then
-    redMessage "Failed command: https://raw.githubusercontent.com/MaanKoloo/test/master/sinusbot2_installer.sh#L""$1"
+    redMessage "Failed command: https://github.com/Sinusbot/installer-linux/blob/master/sinusbot_installer.sh#L""$1"
   else
     redMessage "Command which failed was: \"${FAILED_COMMAND}\". Please try to execute it manually and attach the output to the bug report in the forum thread."
     redMessage "If it still doesn't work report this to the author at https://forum.sinusbot.com/threads/sinusbot-installer-script.1200/ only. Not a PN or a bad review, cause this is an error of your system not of the installer script. Line $1."
@@ -144,13 +144,13 @@ if [[ $INSTALL == "Res" ]]; then
   done
 
   if [ "$OPTION" == "Automatic" ]; then
-    LOCATION=/opt/sinusbot2
+    LOCATION=/opt/sinusbot
   elif [ "$OPTION" == "Own path" ]; then
-    yellowMessage "Enter location where the bot should be installed/updated/removed. Like /opt/sinusbot2. Include the / at first position and none at the end"!
+    yellowMessage "Enter location where the bot should be installed/updated/removed. Like /opt/sinusbot. Include the / at first position and none at the end"!
 
     LOCATION=""
     while [[ ! -d $LOCATION ]]; do
-      read -rp "Location [/opt/sinusbot2]: " LOCATION
+      read -rp "Location [/opt/sinusbot]: " LOCATION
       if [[ $INSTALL != "Inst" && ! -d $LOCATION ]]; then
         redMessage "Directory not found, try again"!
       fi
@@ -170,7 +170,7 @@ if [[ $INSTALL == "Res" ]]; then
     if [ "$OPTION" == "No, change it" ]; then
       LOCATION=""
       while [[ ! -d $LOCATION ]]; do
-        read -rp "Location [/opt/sinusbot2]: " LOCATION
+        read -rp "Location [/opt/sinusbot]: " LOCATION
         if [[ $INSTALL != "Inst" && ! -d $LOCATION ]]; then
           redMessage "Directory not found, try again"!
         fi
@@ -180,9 +180,9 @@ if [[ $INSTALL == "Res" ]]; then
     fi
   fi
 
-  LOCATIONex=$LOCATION/sinusbot2
+  LOCATIONex=$LOCATION/sinusbot
 
-  if [[ ! -f $LOCATION/sinusbot2 ]]; then
+  if [[ ! -f $LOCATION/sinusbot ]]; then
     errorExit "SinusBot wasn't found at $LOCATION. Exiting script."
   fi
 
@@ -192,7 +192,7 @@ if [[ $INSTALL == "Res" ]]; then
   greenMessage "Please login to your SinusBot webinterface as admin and '$PW'"
   yellowMessage "After that change your password under Settings->User Accounts->admin->Edit. The script restart the bot with init.d or systemd."
 
-  if [[ -f /lib/systemd/system/sinusbot2.service ]]; then
+  if [[ -f /lib/systemd/system/sinusbot.service ]]; then
     if [[ $(systemctl is-active sinusbot >/dev/null && echo UP || echo DOWN) == "UP" ]]; then
       service sinusbot stop
     fi
@@ -217,11 +217,11 @@ if [[ $INSTALL == "Res" ]]; then
 
       greenMessage "Successfully changed your admin password."
 
-      if [[ -f /lib/systemd/system/sinusbot2.service ]]; then
-        service sinusbot2 start
+      if [[ -f /lib/systemd/system/sinusbot.service ]]; then
+        service sinusbot start
         greenMessage "Started your bot with systemd."
       elif [[ -f /etc/init.d/sinusbot ]]; then
-        /etc/init.d/sinusbot2 start
+        /etc/init.d/sinusbot start
         greenMessage "Started your bot with initd."
       else
         redMessage "Please start your bot normally"!
@@ -331,7 +331,7 @@ select OPTION in "${OPTIONS[@]}"; do
 done
 
 if [ "$OPTION" == "Automatic" ]; then
-  LOCATION=/opt/sinusbot2
+  LOCATION=/opt/sinusbot
 elif [ "$OPTION" == "Own path" ]; then
   yellowMessage "Enter location where the bot should be installed/updated/removed, e.g. /opt/sinusbot. Include the / at first position and none at the end"!
   LOCATION=""
@@ -483,12 +483,12 @@ if [ "$INSTALL" == "Rem" ]; then
     done
   fi
 
-  if [[ -f /lib/systemd/system/sinusbot2.service ]]; then
+  if [[ -f /lib/systemd/system/sinusbot.service ]]; then
     if [[ $(systemctl is-active sinusbot >/dev/null && echo UP || echo DOWN) == "UP" ]]; then
       service sinusbot stop
       systemctl disable sinusbot
     fi
-    rm /lib/systemd/system/sinusbot2.service
+    rm /lib/systemd/system/sinusbot.service
   elif [[ -f /etc/init.d/sinusbot ]]; then
     if [ "$(/etc/init.d/sinusbot status | awk '{print $NF; exit}')" == "UP" ]; then
       su -c "/etc/init.d/sinusbot stop" $SINUSBOTUSER
@@ -600,7 +600,7 @@ if [ "$DISCORD" == "false" ]; then
 
 greenMessage "Searching latest TS3-Client build for hardware type $MACHINE with arch $ARCH."
 
-VERSION="3.5.2"
+VERSION="3.5.3"
 
 DOWNLOAD_URL_VERSION="https://files.teamspeak-services.com/releases/client/$VERSION/TeamSpeak3-Client-linux_$ARCH-$VERSION.run"
  STATUS=$(wget --server-response -L $DOWNLOAD_URL_VERSION 2>&1 | awk '/^  HTTP/{print $2}')
@@ -833,26 +833,26 @@ if [[ "$USE_SYSTEMD" == true ]]; then
 
   greenMessage "Starting systemd installation"
 
-  if [[ -f /etc/systemd/system/sinusbot2.service ]]; then
+  if [[ -f /etc/systemd/system/sinusbot.service ]]; then
     service sinusbot stop
     systemctl disable sinusbot
-    rm /etc/systemd/system/sinusbot2.service
+    rm /etc/systemd/system/sinusbot.service
   fi
 
   cd /lib/systemd/system/
 
-  wget -q https://raw.githubusercontent.com/MaanKoloo/test/master/sinusbot2_installer.sh
+  wget -q https://raw.githubusercontent.com/Sinusbot/linux-startscript/master/sinusbot.service
 
-  if [ ! -f sinusbot2.service ]; then
+  if [ ! -f sinusbot.service ]; then
     errorExit "Download failed! Exiting now"!
   fi
 
-  sed -i 's/User=YOUR_USER/User='$SINUSBOTUSER'/g' /lib/systemd/system/sinusbot2.service
-  sed -i 's!ExecStart=YOURPATH_TO_THE_BOT_BINARY!ExecStart='$LOCATIONex'!g' /lib/systemd/system/sinusbot2.service
-  sed -i 's!WorkingDirectory=YOURPATH_TO_THE_BOT_DIRECTORY!WorkingDirectory='$LOCATION'!g' /lib/systemd/system/sinusbot2.service
+  sed -i 's/User=YOUR_USER/User='$SINUSBOTUSER'/g' /lib/systemd/system/sinusbot.service
+  sed -i 's!ExecStart=YOURPATH_TO_THE_BOT_BINARY!ExecStart='$LOCATIONex'!g' /lib/systemd/system/sinusbot.service
+  sed -i 's!WorkingDirectory=YOURPATH_TO_THE_BOT_DIRECTORY!WorkingDirectory='$LOCATION'!g' /lib/systemd/system/sinusbot.service
 
   systemctl daemon-reload
-  systemctl enable sinusbot2.service
+  systemctl enable sinusbot.service
 
   greenMessage 'Installed systemd file to start the SinusBot with "service sinusbot {start|stop|status|restart}"'
 
@@ -862,7 +862,7 @@ elif [[ "$USE_SYSTEMD" == false ]]; then
 
   cd /etc/init.d/
 
-  wget -q https://raw.githubusercontent.com/MaanKoloo/test/master/sinusbot
+  wget -q https://raw.githubusercontent.com/Sinusbot/linux-startscript/obsolete-init.d/sinusbot
 
   if [ ! -f sinusbot ]; then
     errorExit "Download failed! Exiting now"!
@@ -887,7 +887,7 @@ cd $LOCATION
 if [ "$INSTALL" == "Inst" ]; then
   if [ "$DISCORD" == "false" ]; then
     if [[ ! -f $LOCATION/config.ini ]]; then
-      echo 'ListenPort = 8088
+      echo 'ListenPort = 8086
       ListenHost = "0.0.0.0"
       TS3Path = "'$LOCATION'/teamspeak3-client/ts3client_linux_amd64"
       YoutubeDLPath = ""' >>$LOCATION/config.ini
@@ -897,7 +897,7 @@ if [ "$INSTALL" == "Inst" ]; then
     fi
   else
     if [[ ! -f $LOCATION/config.ini ]]; then
-      echo 'ListenPort = 8088
+      echo 'ListenPort = 8086
       ListenHost = "0.0.0.0"
       TS3Path = ""
       YoutubeDLPath = ""' >>$LOCATION/config.ini
@@ -1017,9 +1017,9 @@ if [ "$INSTALL" != "Updt" ]; then
 fi
 
 if [[ "$USE_SYSTEMD" == true ]]; then
-  service sinusbot2 start
+  service sinusbot start
 elif [[ "$USE_SYSTEMD" == false ]]; then
-  /etc/init.d/sinusbot2 start
+  /etc/init.d/sinusbot start
 fi
 yellowMessage "Please wait... This will take some seconds"!
 chown -R $SINUSBOTUSER:$SINUSBOTUSER $LOCATION
@@ -1032,11 +1032,11 @@ fi
 
 if [[ -f /etc/centos-release ]]; then
   if [ "$FIREWALL" == "ip" ]; then
-    iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 8088 -j ACCEPT
+    iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 8086 -j ACCEPT
   elif [ "$FIREWALL" == "fs" ]; then
     if rpm -q --quiet firewalld; then
       zone=$(firewall-cmd --get-active-zones | awk '{print $1; exit}')
-      firewall-cmd --zone=$zone --add-port=8088/tcp --permanent >/dev/null
+      firewall-cmd --zone=$zone --add-port=8086/tcp --permanent >/dev/null
       firewall-cmd --reload >/dev/null
     fi
   fi
@@ -1066,7 +1066,7 @@ if [[ "$IS_RUNNING" == true ]]; then
   fi
 
   if [[ $INSTALL == "Updt" ]]; then
-    if [[ -f /lib/systemd/system/sinusbot2.service ]]; then
+    if [[ -f /lib/systemd/system/sinusbot.service ]]; then
       service sinusbot restart
       greenMessage "Restarted your bot with systemd."
     fi
@@ -1074,9 +1074,9 @@ if [[ "$IS_RUNNING" == true ]]; then
       /etc/init.d/sinusbot restart
       greenMessage "Restarted your bot with initd."
     fi
-    greenMessage "All right. Everything is updated successfully. SinusBot is UP on '$ipaddress:8088' :)"
+    greenMessage "All right. Everything is updated successfully. SinusBot is UP on '$ipaddress:8086' :)"
   else
-    greenMessage "All right. Everything is installed successfully. SinusBot is UP on '$ipaddress:8088' :) Your user = 'admin' and password = '$password'"
+    greenMessage "All right. Everything is installed successfully. SinusBot is UP on '$ipaddress:8086' :) Your user = 'admin' and password = '$password'"
   fi
   if [[ "$USE_SYSTEMD" == true ]]; then
     redMessage 'Stop it with "service sinusbot stop".'
