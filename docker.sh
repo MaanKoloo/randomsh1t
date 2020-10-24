@@ -217,7 +217,7 @@ install() {
             rm get-docker.sh
 
             if [[ $EUID -ne 0 ]]; then
-                sudo usermod -aG docker "$(whoami)"
+                 usermod -aG docker "$(whoami)"
 
                 echo "You must log out or restart to apply necessary Docker permissions changes."
                 echo "Restart, then continue installing using this script."
@@ -233,16 +233,16 @@ install() {
             local COMPOSE_VERSION=1.25.3
 
             if [[ $EUID -ne 0 ]]; then
-                if [[ ! $(command -v sudo) ]]; then
-                    echo "Sudo does not appear to be installed."
-                    echo "Install sudo using your host's package manager,"
+                if [[ ! $(command -v ) ]]; then
+                    echo " does not appear to be installed."
+                    echo "Install  using your host's package manager,"
                     echo "then continue installing using this script."
                     exit 1
                 fi
 
-                sudo sh -c "curl -fsSL https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose"
-                sudo chmod +x /usr/local/bin/docker-compose
-                sudo sh -c "curl -fsSL https://raw.githubusercontent.com/docker/compose/${COMPOSE_VERSION}/contrib/completion/bash/docker-compose -o /etc/bash_completion.d/docker-compose"
+                 sh -c "curl -fsSL https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose"
+                 chmod +x /usr/local/bin/docker-compose
+                 sh -c "curl -fsSL https://raw.githubusercontent.com/docker/compose/${COMPOSE_VERSION}/contrib/completion/bash/docker-compose -o /etc/bash_completion.d/docker-compose"
             else
                 curl -fsSL https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
                 chmod +x /usr/local/bin/docker-compose
@@ -555,7 +555,6 @@ uninstall() {
         echo "  docker volume prune -f"
         echo ""
     fi
-
     exit
 }
 
